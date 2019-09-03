@@ -59,7 +59,7 @@ public class BasicApiPluginTest {
             project.getPublishersList().add(basicApiPluginBefore);
             jenkins.submit(jenkins.createWebClient().getPage(project, "configure").getFormByName("config"));
             BasicApiPlugin basicApiPluginAfter = project.getPublishersList().get(BasicApiPlugin.class);
-            jenkins.assertEqualBeans(basicApiPluginBefore, basicApiPluginAfter, "fileFound,filePattern");
+            jenkins.assertEqualBeans(basicApiPluginBefore, basicApiPluginAfter, "failBuildIfNoFiles,fileSearchPattern");
         });
     }
 
@@ -71,18 +71,18 @@ public class BasicApiPluginTest {
     public void globalConfigCheck() {
 
         rr.then(r -> {
-            DescriptorImpl descriptoriml = (DescriptorImpl) r.jenkins.getDescriptor(BasicApiPlugin.class);
-            Method templatesField = ReflectionUtils.getPublicMethodNamed(DescriptorImpl.class, "getFilesUploadApiUrl");
+            BasicApiPlugin.DescriptorImpl descriptoriml = (BasicApiPlugin.DescriptorImpl) r.jenkins.getDescriptor(BasicApiPlugin.class);
+            Method templatesField = ReflectionUtils.getPublicMethodNamed(BasicApiPlugin.DescriptorImpl.class, "getFilesUploadApiUrl");
             assertNull("not set initially", templatesField.getDefaultValue());
             HtmlForm config = r.createWebClient().goTo("configure").getFormByName("config");
-            HtmlTextInput textbox = config.getInputByName("_.serverUrl");
+            HtmlTextInput textbox = config.getInputByName("_.filesUploadApiUrl");
             textbox.setText("hello");
             r.submit(config);
             assert descriptoriml != null;
             assertEquals("global config page let us edit it", "hello", descriptoriml.getFilesUploadApiUrl());
         });
         rr.then(r -> {
-            DescriptorImpl descriptorIml = (DescriptorImpl) r.jenkins.getDescriptor(BasicApiPlugin.class);
+            BasicApiPlugin.DescriptorImpl descriptorIml = (BasicApiPlugin.DescriptorImpl) r.jenkins.getDescriptor(BasicApiPlugin.class);
             assert descriptorIml != null;
             assertEquals("still there after restart of Jenkins", "hello", descriptorIml.getFilesUploadApiUrl());
         });
